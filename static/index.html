@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Python Interpreter</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.1/codemirror.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.1/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.63.1/mode/python/python.min.js"></script>
+    <style>
+        .CodeMirror {
+            height: 400px;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>Python Interpreter</h1>
+    <textarea id="codeInput"></textarea>
+    <button onclick="executeCode()">Execute</button>
+    <div id="output"></div>
+
+    <script>
+        var editor = CodeMirror.fromTextArea(document.getElementById("codeInput"), {
+            mode: "python",
+            lineNumbers: true
+        });
+
+        function executeCode() {
+            var code = editor.getValue();
+            const sessionId = "default";
+            var filename = "code.py";
+            var fileContent = new Blob([code], { type: 'text/plain' });
+
+            var formData = new FormData();
+            formData.append("file", fileContent);
+
+            fetch(`http://localhost:5000/execute/file/${sessionId}`, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById("output").innerText = "Error: " + data.error;
+                } else {
+                    document.getElementById("output").innerText = "Result: " + data.result;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</body>
+</html>
